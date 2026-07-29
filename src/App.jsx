@@ -18,18 +18,40 @@ const pizzas = [
   }
 ]
 
+
 function App() {
   // const [count, setCount] = useState(0)
 
   // const title = 'React';
   //  <> and </> it's just a empty div
-  console.log(pizzas[0])
   return (
+    <>
+      <Search />
+      <Menu />
+    </>
+  )
+}
+function Search(){
+  return(
     <>
       <label htmlFor="search">Search: </label>
       <input type="text" id="search" />
     </>
-  )
+  );
+}
+function Menu(){
+  return(
+    <ul>
+      {pizzas.map(function (pizza){
+        return(
+          <li key={pizza.id}>
+            <span>{pizza.type}</span>
+            <a href={pizza.url}>{pizza.price}</a>
+          </li>
+        );
+      })}
+    </ul>
+  );
 }
 
 export default App
