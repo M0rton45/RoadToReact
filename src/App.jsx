@@ -19,7 +19,7 @@ const pizzas = [
 ]
 
 
-function App() {
+const App = () => {
   // const [count, setCount] = useState(0)
 
   // const title = 'React';
@@ -31,7 +31,7 @@ function App() {
     </>
   )
 }
-function Search(){
+const Search = () => {
   return(
     <>
       <label htmlFor="search">Search: </label>
@@ -39,7 +39,7 @@ function Search(){
     </>
   );
 }
-function Menu(){
+const Menu = () => {
   return(
     <ul>
       {pizzas.map(function (pizza){
