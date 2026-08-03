@@ -21,8 +21,13 @@ const App = () => {
       id: 1,
     }
   ];
+  // Move State from Search() to App() 
+  const [searchTerm, setSearchTerm] = React.useState('');
+  // Event handler in App()
   const handleSearch = (event) =>{
-    console.log(event.target.value);
+    // show variable from Search() input in App()
+    // console.log(event.target.value);
+    setSearchTerm(event.target.value);
   };
   // const [count, setCount] = useState(0)
 
@@ -30,34 +35,43 @@ const App = () => {
   //  <> and </> it's just a empty div
   return (
     <>
+      {/* turn Search function with a habdleSearch as a paramter for communication*/}
       <Search onSearch={handleSearch}/>
-      {/* add list for menu beacause now object is in App not in global window */}
+      {/* add list props for menu beacause now object is in App not in global window */}
       <Menu list={pizzas}/>
     </>
   )
 }
-const Search = (props) => {
-  // in () of useState we compose a default value
-  const [searchTerm, setSearchTerm] = React.useState('');
+const Search = (props) =>(
+  <>
+    <label htmlFor="search">Search: </label>
+    {/* using props onSearch (handleSearch) */}
+    <input id="search" type="text" onChange={props.onSearch}/>
+    {/* when onChange users turn handleSearch function and App() update state */}
+  </>
+)
+// add props
+// const Search = (props) => {
+//   // in () of useState we compose a default value
 
-  const handleChange = (event) => {
-    // console.log(event);
-    setSearchTerm(event.target.value);
-    props.onSearch(event);
-    // console.log(event.target.value);
-    // returning value from input when input have changes
-  };
+//   const handleChange = (event) => {
+//     // console.log(event);
+//     // executed  props onSearch as callback handler
+//     props.onSearch(event);
+//     // console.log(event.target.value);
+//     // returning value from input when input have changes
+//   };
 
-  return(
-    <>
-      <label htmlFor="search">Search: </label>
-      <input type="text" id="search" onChange={handleChange}/>
-      {/* dostajemy aktualną zawartość inputa na stronie */}
-      <p>{searchTerm}</p>
-      {/* handleChange without ()  */}
-    </>
-  );
-}
+//   return(
+//     <>
+//       <label htmlFor="search">Search: </label>
+//       <input type="text" id="search" onChange={props.onSearch}/>
+//       {/* dostajemy aktualną zawartość inputa na stronie */}
+//       {/* <p>{searchTerm}</p> */}
+//       {/* handleChange without ()  */}
+//     </>
+//   );
+// }
 // now Menu need props to use pizzas
 const Menu = (props) => (
     <ul>
