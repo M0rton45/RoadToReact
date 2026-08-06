@@ -2,7 +2,8 @@
 import React from 'react';
 import './App.css'
 
-
+// TODO
+// filtr a pizzas before render by state of input field
 
 const App = () => {
   const pizzas = [
@@ -19,16 +20,33 @@ const App = () => {
       img: './assets/pepperoni.jpg',
       price: 29.90,
       id: 1,
+    },
+    {
+      type: 'mafioso',
+      url: 'https://www.dagrasso.pl/productdetailsv2/Pizza/Mafioso?localization',
+      img: './assets/mafiosa.jpg',
+      price: 31.40,
+      id: 2,
     }
   ];
   // Move State from Search() to App() 
-  const [searchTerm, setSearchTerm] = React.useState('');
+  const [searchTerm, setSearchTerm] = React.useState('mafioso');
   // Event handler in App()
   const handleSearch = (event) =>{
     // show variable from Search() input in App()
     // console.log(event.target.value);
     setSearchTerm(event.target.value);
+    // console.log(searchTerm);
+    // console.log(pizzas[0].type);
   };
+  // pizzas array with filter (with function as parm and function with parm as a element of array)
+  const searchedPizzas = pizzas.filter(function (pizza){
+    // now we chose what we want from element .type
+    // then .includes chcecs value match with searchTerm like p$ or m$
+    // console.log(searchTerm.toLowerCase());
+    return pizza.type.includes(searchTerm.toLowerCase());
+  })
+  // console.log(searchTerm);
   // const [count, setCount] = useState(0)
 
   // const title = 'React';
@@ -36,17 +54,20 @@ const App = () => {
   return (
     <>
       {/* turn Search function with a habdleSearch as a paramter for communication*/}
-      <Search onSearch={handleSearch}/>
+      <Search onSearch={handleSearch} initValue={searchTerm}/>
       {/* add list props for menu beacause now object is in App not in global window */}
-      <Menu list={pizzas}/>
+      <Menu list={searchedPizzas} />
     </>
   )
 }
+
 const Search = (props) =>(
+  // console.log(props.onSearch),
   <>
     <label htmlFor="search">Search: </label>
     {/* using props onSearch (handleSearch) */}
-    <input id="search" type="text" onChange={props.onSearch}/>
+    {/* Use props to add for input initValue as a searchTerm*/}
+    <input id="search" type="text" onChange={props.onSearch} value={props.initValue}/>
     {/* when onChange users turn handleSearch function and App() update state */}
   </>
 )
