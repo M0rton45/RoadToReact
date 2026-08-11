@@ -44,7 +44,7 @@ const App = () => {
     // now we chose what we want from element .type
     // then .includes chcecs value match with searchTerm like p$ or m$
     // console.log(searchTerm.toLowerCase());
-    return pizza.type.includes(searchTerm.toLowerCase());
+    return pizza.type.toLowerCase().includes(searchTerm.toLowerCase());
   })
   // console.log(searchTerm);
   // const [count, setCount] = useState(0)
@@ -54,23 +54,35 @@ const App = () => {
   return (
     <>
       {/* turn Search function with a habdleSearch as a paramter for communication*/}
-      <Search onSearch={handleSearch} initValue={searchTerm}/>
+      <Search onSearch={handleSearch} search={searchTerm}/>
       {/* add list props for menu beacause now object is in App not in global window */}
       <Menu list={searchedPizzas} />
     </>
   )
 }
 
-const Search = (props) =>(
-  // console.log(props.onSearch),
+// controlled component with props from App() (onChange) and (value) useState for input field
+const Search = (props) =>{
+// console.log(props.onSearch),
+  // using array destruct for shorter assing
+  // from props.search to search
+  const { search, onSearch} = props;
+  return(
   <>
+  {/* Controlled element */}
     <label htmlFor="search">Search: </label>
     {/* using props onSearch (handleSearch) */}
     {/* Use props to add for input initValue as a searchTerm*/}
-    <input id="search" type="text" onChange={props.onSearch} value={props.initValue}/>
+    <input 
+      id="search" 
+      type="text" 
+      onChange={onSearch} 
+      value={search}
+    />
     {/* when onChange users turn handleSearch function and App() update state */}
   </>
-)
+  )
+}
 // add props
 // const Search = (props) => {
 //   // in () of useState we compose a default value
@@ -94,18 +106,19 @@ const Search = (props) =>(
 //   );
 // }
 // now Menu need props to use pizzas
-const Menu = (props) => (
+// destructuring props to list
+const Menu = ({list}) => (
     <ul>
-      {props.list.map((pizza) =>(
+      {list.map((pizza) =>(
         <Item key={pizza.id} pizza={pizza}/>   
       ))}
     </ul>
 )
-const Item = (props) => (
+const Item = ({pizza}) => (
   // przy item nie trzeba key bo zwraca undefined
           <li>
-            <span>{props.pizza.type}</span>
-            <a href={props.pizza.url}>{props.pizza.price}</a>
+            <span>{pizza.type}</span>
+            <a href={pizza.url}>{pizza.price}</a>
           </li>       
 )
 
