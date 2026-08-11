@@ -62,11 +62,12 @@ const App = () => {
 }
 
 // controlled component with props from App() (onChange) and (value) useState for input field
-const Search = (props) =>{
+const Search = ({search, onSearch}) =>{
 // console.log(props.onSearch),
   // using array destruct for shorter assing
   // from props.search to search
-  const { search, onSearch} = props;
+  // destructuring in block body
+  // const { search, onSearch} = props;
   return(
   <>
   {/* Controlled element */}
@@ -114,11 +115,15 @@ const Menu = ({list}) => (
       ))}
     </ul>
 )
-const Item = ({pizza}) => (
+const Item = ({pizza:{
+    type, 
+    url, 
+    price
+    }}) => (
   // przy item nie trzeba key bo zwraca undefined
           <li>
-            <span>{pizza.type}</span>
-            <a href={pizza.url}>{pizza.price}</a>
+            <span>{type}</span>
+            <a href={url}>{price}</a>
           </li>       
 )
 
