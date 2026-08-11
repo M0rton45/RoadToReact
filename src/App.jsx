@@ -110,9 +110,10 @@ const Search = ({search, onSearch}) =>{
 // destructuring props to list
 const Menu = ({list}) => (
     <ul>
-      {list.map((pizza) =>(
+      {list.map(({id, ...pizza}) =>(
         <Item 
-          key={pizza.id} {...pizza}
+          key={id} 
+          {...pizza}
           // pizza={pizza}
           // type={pizza.type}
           // url={pizza.url}
@@ -123,11 +124,11 @@ const Menu = ({list}) => (
 )
 //  We can chose if we want to group elements
 //  Now we chose pizzzaOnlyPrice is a object without type and url because we destructured them in Item() function
-const Item = ({type, url, ...pizzzaOnlyPrice}) => (
+const Item = ({type, url, price}) => (
   // przy item nie trzeba key bo zwraca undefined
           <li>
             <span>{type}</span>
-            <a href={url}>{pizzzaOnlyPrice.price}</a>
+            <a href={url}>{price}</a>
           </li>       
 )
 
