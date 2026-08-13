@@ -30,12 +30,23 @@ const App = () => {
     }
   ];
   // Move State from Search() to App() 
-  const [searchTerm, setSearchTerm] = React.useState('mafioso');
+  // when input field it's empty, when reload page it returns mafioso because of ||
+  const [searchTerm, setSearchTerm] = React.useState(
+    localStorage.getItem('search') || 'mafioso'
+    // if empty initial value is 'mafioso'
+  );
+  // controliing side effect (searchTerm changes) with useEffect 
+  React.useEffect(() =>{
+    localStorage.setItem('search', searchTerm);
+  }, [searchTerm]);
+
   // Event handler in App()
   const handleSearch = (event) =>{
     // show variable from Search() input in App()
     // console.log(event.target.value);
     setSearchTerm(event.target.value);
+    // move setItem from handleSearch to useEffect to trigger side-effect only when searchTerm change
+    // localStorage.setItem('searchTerm', event.target.value);
     // console.log(searchTerm);
     // console.log(pizzas[0].type);
   };
@@ -110,10 +121,10 @@ const Search = ({search, onSearch}) =>{
 // destructuring props to list
 const Menu = ({list}) => (
     <ul>
-      {list.map(({id, ...pizza}) =>(
+      {list.map((pizza) =>(
         <Item 
-          key={id} 
-          {...pizza}
+          key={pizza.id} 
+          pizza={pizza}
           // pizza={pizza}
           // type={pizza.type}
           // url={pizza.url}
@@ -124,11 +135,11 @@ const Menu = ({list}) => (
 )
 //  We can chose if we want to group elements
 //  Now we chose pizzzaOnlyPrice is a object without type and url because we destructured them in Item() function
-const Item = ({type, url, price}) => (
+const Item = ({pizza}) => (
   // przy item nie trzeba key bo zwraca undefined
           <li>
-            <span>{type}</span>
-            <a href={url}>{price}</a>
+            <span>{pizza.type}</span>
+            <a href={pizza.url}>{pizza.price}</a>
           </li>       
 )
 
