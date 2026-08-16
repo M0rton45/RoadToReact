@@ -35,7 +35,7 @@ const App = () => {
     localStorage.getItem('search') || 'mafioso'
     // if empty initial value is 'mafioso'
   );
-  // controliing side effect (searchTerm changes) with useEffect 
+  // controliing side-effect (searchTerm changes) with useEffect 
   React.useEffect(() =>{
     localStorage.setItem('search', searchTerm);
   }, [searchTerm]);
