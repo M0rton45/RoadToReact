@@ -81,20 +81,48 @@ const Search = ({search, onSearch}) =>{
   // const { search, onSearch} = props;
   return(
   <>
+    <InputWithLabel
+      id="search"
+      onInputChange={onSearch}
+      value={search}
+    >
+      <strong>Search:</strong> 
+    </InputWithLabel>
+    
   {/* Controlled element */}
-    <label htmlFor="search">Search: </label>
+    {/* <label htmlFor="search">Search: </label>
     {/* using props onSearch (handleSearch) */}
     {/* Use props to add for input initValue as a searchTerm*/}
-    <input 
+    {/* <input 
       id="search" 
       type="text" 
       onChange={onSearch} 
       value={search}
-    />
+    /> */}
     {/* when onChange users turn handleSearch function and App() update state */}
   </>
   )
 }
+// Reusable Input
+const InputWithLabel = ({
+  id,
+  type = 'text',
+  onInputChange,
+  value,
+  children,
+}) => (
+  <>
+    <label htmlFor="id">{children}</label>
+    &nbsp;
+    <input 
+      id={id}
+      type={type}
+      onChange={onInputChange}
+      value={value}
+    />
+  </>
+)
+
 // add props
 // const Search = (props) => {
 //   // in () of useState we compose a default value
