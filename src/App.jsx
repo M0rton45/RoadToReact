@@ -1,40 +1,58 @@
 // import { useState } from 'react'
-import React from 'react';
+import React, { useState } from 'react';
 import './App.css'
 
 // TODO
 // filtr a pizzas before render by state of input field
 
 const App = () => {
-  const pizzas = [
-    {
-      type: 'margherita',
-      url: 'https://aniagotuje.pl/przepis/pizza-margherita',
-      img: './assets/margherita.jpg',
-      price: 24.90,
-      id: 0,
-    },
-    {
-      type: 'pepperoni',
-      url: 'https://aniagotuje.pl/przepis/pizza-pepperoni',
-      img: './assets/pepperoni.jpg',
-      price: 29.90,
-      id: 1,
-    },
-    {
-      type: 'mafioso',
-      url: 'https://www.dagrasso.pl/productdetailsv2/Pizza/Mafioso?localization',
-      img: './assets/mafiosa.jpg',
-      price: 31.40,
-      id: 2,
-    }
-  ];
+  const initialPizzas = [
+      {
+        type: 'margherita',
+        url: 'https://aniagotuje.pl/przepis/pizza-margherita',
+        img: './assets/margherita.jpg',
+        price: 24.90,
+        id: 0,
+      },
+      {
+        type: 'pepperoni',
+        url: 'https://aniagotuje.pl/przepis/pizza-pepperoni',
+        img: './assets/pepperoni.jpg',
+        price: 29.90,
+        id: 1,
+      },
+      {
+        type: 'mafioso',
+        url: 'https://www.dagrasso.pl/productdetailsv2/Pizza/Mafioso?localization',
+        img: './assets/mafiosa.jpg',
+        price: 31.40,
+        id: 2,
+      }
+    ];
+  const [pizzas, setPizzas] = React.useState(initialPizzas);
+    
+  // callback to get pizzas id
+  const handleClicked = (event) =>{
+    console.log(pizzas);
+    // console.log(event.target.id);
+  // updateing a pizzas useState which item stays
+  setPizzas(pizzas.filter(function (pizza) {
+    // returning diffrent than been clicked
+    return pizza.id !== Number(event.target.id);
+  }))
+    // console.log(btn);s
+    // pizzas.splice(Number(event.target.id),1);
+    // console.log(btn);
+  }
   // Move State from Search() to App() 
   // when input field it's empty, when reload page it returns mafioso because of ||
   const [searchTerm, setSearchTerm] = React.useState(
     localStorage.getItem('search') || 'mafioso'
     // if empty initial value is 'mafioso'
   );
+  // on start works, but when reused then use a last id
+
+  
   // controliing side effect (searchTerm changes) with useEffect 
   React.useEffect(() =>{
     localStorage.setItem('search', searchTerm);
@@ -52,9 +70,17 @@ const App = () => {
   };
   // pizzas array with filter (with function as parm and function with parm as a element of array)
   const searchedPizzas = pizzas.filter(function (pizza){
+    // pizzas.splice(btn,1)
+    // console.log(pizzas.splice(1,1));
+    // if(btn!=null){
+    //   console.log(btn);
+    //   pizza.splice(btn,1);
+    //   setBtn(null);
+    // }
     // now we chose what we want from element .type
     // then .includes chcecs value match with searchTerm like p$ or m$
     // console.log(searchTerm.toLowerCase());
+    // console.log(btn);
     return pizza.type.toLowerCase().includes(searchTerm.toLowerCase());
   })
   // console.log(searchTerm);
@@ -64,10 +90,11 @@ const App = () => {
   //  <> and </> it's just a empty div
   return (
     <>
-      {/* turn Search function with a habdleSearch as a paramter for communication*/}
+      {/* turn Search function with a handleSearch as a paramter for communication*/}
       <Search onSearch={handleSearch} search={searchTerm}/>
       {/* add list props for menu beacause now object is in App not in global window */}
-      <Menu list={searchedPizzas} />
+      <Menu list={searchedPizzas} onClick={handleClicked}/>
+
     </>
   )
 }
@@ -88,7 +115,7 @@ const Search = ({search, onSearch}) =>{
     >
       <strong>Search:</strong> 
     </InputWithLabel>
-    
+  
   {/* Controlled element */}
     {/* <label htmlFor="search">Search: </label>
     {/* using props onSearch (handleSearch) */}
@@ -103,7 +130,22 @@ const Search = ({search, onSearch}) =>{
   </>
   )
 }
-// Reusable Input
+// BUTTON REMOVER
+const BtnRemover = ({
+  id,
+  onBtnClick,
+  type = 'button',
+  children,
+}) => (
+  <button 
+    id={id} 
+    type={type}
+    onClick={onBtnClick}
+  >
+    {children}
+  </button>
+)
+// REUSABLE INPUT
 const InputWithLabel = ({
   id,
   type = 'text',
@@ -112,7 +154,7 @@ const InputWithLabel = ({
   children,
 }) => (
   <>
-    <label htmlFor="id">{children}</label>
+    <label htmlFor={id}>{children}</label>
     &nbsp;
     <input 
       id={id}
@@ -147,12 +189,16 @@ const InputWithLabel = ({
 // }
 // now Menu need props to use pizzas
 // destructuring props to list
-const Menu = ({list}) => (
+const Menu = ({list,onClick}) => 
+  (
+    // console.log(click),
+    // console.log(list),
     <ul>
       {list.map((pizza) =>(
         <Item 
           key={pizza.id} 
           pizza={pizza}
+          onClick={onClick}
           // pizza={pizza}
           // type={pizza.type}
           // url={pizza.url}
@@ -160,14 +206,20 @@ const Menu = ({list}) => (
         />   
       ))}
     </ul>
-)
+  )
 //  We can chose if we want to group elements
 //  Now we chose pizzzaOnlyPrice is a object without type and url because we destructured them in Item() function
-const Item = ({pizza}) => (
+const Item = ({pizza,onClick}) => (
   // przy item nie trzeba key bo zwraca undefined
           <li>
             <span>{pizza.type}</span>
             <a href={pizza.url}>{pizza.price}</a>
+            <BtnRemover
+              id={pizza.id}
+              onBtnClick={onClick}
+            >
+              Remove
+            </BtnRemover> 
           </li>       
 )
 
