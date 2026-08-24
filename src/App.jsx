@@ -31,19 +31,23 @@ const App = () => {
     ];
   const [pizzas, setPizzas] = React.useState(initialPizzas);
     
-  // callback to get pizzas id
-  const handleClicked = (event) =>{
-    console.log(pizzas);
-    // console.log(event.target.id);
-  // updateing a pizzas useState which item stays
-  setPizzas(pizzas.filter(function (pizza) {
-    // returning diffrent than been clicked
-    return pizza.id !== Number(event.target.id);
-  }))
-    // console.log(btn);s
-    // pizzas.splice(Number(event.target.id),1);
-    // console.log(btn);
+  // callback (book way)
+  const handleRemovePizzas = (item) =>{
+    const newPizzas = pizzas.filter(
+      (pizza) => item.id !== pizza.id
+    );
+    setPizzas(newPizzas);
   }
+  // callback to get pizzas id
+  // const handleClicked = (event) =>{
+  //   console.log(pizzas);
+  // // updateing a pizzas useState which item stays
+  // setPizzas(pizzas.filter(function (pizza) {
+  //   // returning diffrent than been clicked
+  //   return pizza.id !== Number(event.target.id);
+  // }))
+  // Now we can add useEffect for localStorage if needed
+  
   // Move State from Search() to App() 
   // when input field it's empty, when reload page it returns mafioso because of ||
   const [searchTerm, setSearchTerm] = React.useState(
@@ -61,30 +65,14 @@ const App = () => {
   // Event handler in App()
   const handleSearch = (event) =>{
     // show variable from Search() input in App()
-    // console.log(event.target.value);
     setSearchTerm(event.target.value);
     // move setItem from handleSearch to useEffect to trigger side-effect only when searchTerm change
-    // localStorage.setItem('searchTerm', event.target.value);
-    // console.log(searchTerm);
-    // console.log(pizzas[0].type);
   };
   // pizzas array with filter (with function as parm and function with parm as a element of array)
   const searchedPizzas = pizzas.filter(function (pizza){
-    // pizzas.splice(btn,1)
-    // console.log(pizzas.splice(1,1));
-    // if(btn!=null){
-    //   console.log(btn);
-    //   pizza.splice(btn,1);
-    //   setBtn(null);
-    // }
-    // now we chose what we want from element .type
     // then .includes chcecs value match with searchTerm like p$ or m$
-    // console.log(searchTerm.toLowerCase());
-    // console.log(btn);
     return pizza.type.toLowerCase().includes(searchTerm.toLowerCase());
   })
-  // console.log(searchTerm);
-  // const [count, setCount] = useState(0)
 
   // const title = 'React';
   //  <> and </> it's just a empty div
@@ -93,8 +81,7 @@ const App = () => {
       {/* turn Search function with a handleSearch as a paramter for communication*/}
       <Search onSearch={handleSearch} search={searchTerm}/>
       {/* add list props for menu beacause now object is in App not in global window */}
-      <Menu list={searchedPizzas} onClick={handleClicked}/>
-
+      <Menu list={searchedPizzas} onRemoveItem={handleRemovePizzas}/>
     </>
   )
 }
@@ -189,7 +176,7 @@ const InputWithLabel = ({
 // }
 // now Menu need props to use pizzas
 // destructuring props to list
-const Menu = ({list,onClick}) => 
+const Menu = ({list,onRemoveItem}) => 
   (
     // console.log(click),
     // console.log(list),
@@ -198,7 +185,7 @@ const Menu = ({list,onClick}) =>
         <Item 
           key={pizza.id} 
           pizza={pizza}
-          onClick={onClick}
+          onRemoveItem={onRemoveItem}
           // pizza={pizza}
           // type={pizza.type}
           // url={pizza.url}
@@ -209,18 +196,27 @@ const Menu = ({list,onClick}) =>
   )
 //  We can chose if we want to group elements
 //  Now we chose pizzzaOnlyPrice is a object without type and url because we destructured them in Item() function
-const Item = ({pizza,onClick}) => (
+const Item = ({pizza,onRemoveItem}) => {
+  const handleRemoveItem = () =>{
+    onRemoveItem(pizza);
+  }
   // przy item nie trzeba key bo zwraca undefined
+  return(
           <li>
             <span>{pizza.type}</span>
-            <a href={pizza.url}>{pizza.price}</a>
-            <BtnRemover
-              id={pizza.id}
-              onBtnClick={onClick}
-            >
-              Remove
-            </BtnRemover> 
+            <span>
+              <a href={pizza.url}>{pizza.price}</a>
+            </span>
+            <span>
+              <BtnRemover
+                id={pizza.id}
+                onBtnClick={handleRemoveItem}
+              >
+                Remove
+              </BtnRemover> 
+            </span>
           </li>       
-)
+  )
+}
 
 export default App
