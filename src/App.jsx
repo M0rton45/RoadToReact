@@ -99,6 +99,7 @@ const Search = ({search, onSearch}) =>{
       id="search"
       onInputChange={onSearch}
       value={search}
+      isFocused
     >
       <strong>Search:</strong> 
     </InputWithLabel>
@@ -138,6 +139,7 @@ const InputWithLabel = ({
   type = 'text',
   onInputChange,
   value,
+  isFocused,
   children,
 }) => (
   <>
@@ -148,6 +150,7 @@ const InputWithLabel = ({
       type={type}
       onChange={onInputChange}
       value={value}
+      autoFocus={isFocused}
     />
   </>
 )
