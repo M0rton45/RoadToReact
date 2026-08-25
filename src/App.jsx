@@ -99,7 +99,7 @@ const Search = ({search, onSearch}) =>{
       id="search"
       onInputChange={onSearch}
       value={search}
-      isFocused
+      isFocused 
     >
       <strong>Search:</strong> 
     </InputWithLabel>
@@ -141,19 +141,30 @@ const InputWithLabel = ({
   value,
   isFocused,
   children,
-}) => (
-  <>
-    <label htmlFor={id}>{children}</label>
-    &nbsp;
-    <input 
-      id={id}
-      type={type}
-      onChange={onInputChange}
-      value={value}
-      autoFocus={isFocused}
-    />
-  </>
-)
+}) => {
+  const inputRef = React.useRef();
+  console.log(isFocused);
+  React.useEffect(() => {
+    // console.log(isFocused);
+    console.log(inputRef.current);
+    if(isFocused && inputRef.current){
+      inputRef.current.focus();
+    }
+  }, [isFocused]);
+  return(
+    <>
+      <label htmlFor={id}>{children}</label>
+      &nbsp;
+      <input 
+        ref={inputRef}
+        id={id}
+        type={type}
+        onChange={onInputChange}
+        value={value}
+      />
+    </>
+  );
+};
 
 // add props
 // const Search = (props) => {
