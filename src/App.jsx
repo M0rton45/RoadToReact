@@ -29,10 +29,37 @@ const App = () => {
         id: 2,
       }
     ];
-  const [pizzas, setPizzas] = React.useState(initialPizzas);
-    
+  const [pizzas, setPizzas] = React.useState([]);
+  const [isLoading, setIsLoading] = React.useState(false);
+
+  const getAsyncStories = () =>
+    new Promise((resolve) =>
+      setTimeout(
+        () => resolve({data: { pizzas: initialPizzas}}),
+        2000
+      )
+    );
+
+
+  React.useEffect(()=>{
+    setIsLoading(true);
+    // loadingScreen(isLoading);
+    getAsyncStories().then(result=>{
+      setPizzas(result.data.pizzas);
+      setIsLoading(false);
+    });
+    // setIsLoading(false);
+  },[])
+  
+  // if(isLoading){
+  //   return <p>Loading...</p>;
+  // }
+  // if(isLoading){
+  //   return console.log("Loading..");
+  // };
   // callback (book way)
   const handleRemovePizzas = (item) =>{
+    console.log(item.id);
     const newPizzas = pizzas.filter(
       (pizza) => item.id !== pizza.id
     );
@@ -81,7 +108,13 @@ const App = () => {
       {/* turn Search function with a handleSearch as a paramter for communication*/}
       <Search onSearch={handleSearch} search={searchTerm}/>
       {/* add list props for menu beacause now object is in App not in global window */}
-      <Menu list={searchedPizzas} onRemoveItem={handleRemovePizzas}/>
+      {isLoading ? (
+        // True
+        <p>Loading ...</p>
+      ) : (
+        // Fasle
+        <Menu list={searchedPizzas} onRemoveItem={handleRemovePizzas}/>
+      )}
     </>
   )
 }
@@ -143,10 +176,8 @@ const InputWithLabel = ({
   children,
 }) => {
   const inputRef = React.useRef();
-  console.log(isFocused);
+
   React.useEffect(() => {
-    // console.log(isFocused);
-    console.log(inputRef.current);
     if(isFocused && inputRef.current){
       inputRef.current.focus();
     }
@@ -210,12 +241,8 @@ const Menu = ({list,onRemoveItem}) =>
   )
 //  We can chose if we want to group elements
 //  Now we chose pizzzaOnlyPrice is a object without type and url because we destructured them in Item() function
-const Item = ({pizza,onRemoveItem}) => {
-  const handleRemoveItem = () =>{
-    onRemoveItem(pizza);
-  }
+const Item = ({pizza,onRemoveItem}) => (
   // przy item nie trzeba key bo zwraca undefined
-  return(
           <li>
             <span>{pizza.type}</span>
             <span>
@@ -224,13 +251,12 @@ const Item = ({pizza,onRemoveItem}) => {
             <span>
               <BtnRemover
                 id={pizza.id}
-                onBtnClick={handleRemoveItem}
+                onBtnClick={onRemoveItem.bind(null, pizza)}
               >
                 Remove
               </BtnRemover> 
             </span>
           </li>       
-  )
-}
+)
 
 export default App
