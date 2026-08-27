@@ -31,6 +31,7 @@ const App = () => {
     ];
   const [pizzas, setPizzas] = React.useState([]);
   const [isLoading, setIsLoading] = React.useState(false);
+  const [isError, setIsError] = React.useState(false);
 
   const getAsyncStories = () =>
     new Promise((resolve) =>
@@ -44,10 +45,12 @@ const App = () => {
   React.useEffect(()=>{
     setIsLoading(true);
     // loadingScreen(isLoading);
-    getAsyncStories().then(result=>{
-      setPizzas(result.data.pizzas);
-      setIsLoading(false);
-    });
+    getAsyncStories()
+      .then(result=>{
+        setPizzas(result.data.pizzas);
+        setIsLoading(false);
+    })
+    .catch(()=> setIsError(true));
     // setIsLoading(false);
   },[])
   
@@ -108,6 +111,7 @@ const App = () => {
       {/* turn Search function with a handleSearch as a paramter for communication*/}
       <Search onSearch={handleSearch} search={searchTerm}/>
       {/* add list props for menu beacause now object is in App not in global window */}
+      {isError && <p>Something went wrong ...</p>}
       {isLoading ? (
         // True
         <p>Loading ...</p>
