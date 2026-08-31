@@ -43,14 +43,16 @@ const App = () => {
     );
   
   const pizzasReducer = (state, action) => {
-    if (action.type === 'SET_PIZZAS'){
+    switch (action.type){
+    case 'SET_PIZZAS':
       return action.payload;
-    } else if(action.type === 'REMOVE_PIZZAS'){
+    case 'REMOVE_PIZZAS':
       return state.filter(
         (pizza) => action.payload.id !== pizza.id
       );
-    } else{
+    default:
       throw new Error();
+  
     }
   };
   
