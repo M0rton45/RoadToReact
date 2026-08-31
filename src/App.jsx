@@ -29,27 +29,53 @@ const App = () => {
         id: 2,
       }
     ];
-  const [pizzas, setPizzas] = React.useState([]);
+  // const [pizzas, setPizzas] = React.useState([]);
+  
   const [isLoading, setIsLoading] = React.useState(false);
+  const [isError, setIsError] = React.useState(false);
 
-  const getAsyncStories = () =>
+  const getAsyncPizzas = () =>
     new Promise((resolve) =>
       setTimeout(
         () => resolve({data: { pizzas: initialPizzas}}),
         2000
       )
     );
+  
+  const pizzasReducer = (state, action) => {
+    switch (action.type){
+    case 'SET_PIZZAS':
+      return action.payload;
+    case 'REMOVE_PIZZAS':
+      return state.filter(
+        (pizza) => action.payload.id !== pizza.id
+      );
+    default:
+      throw new Error();
+  
+    }
+  };
+  
+  const [pizzas, dispatchPizzas] = React.useReducer(
+      pizzasReducer,
+      []
+  );
 
-
-  React.useEffect(()=>{
+  React.useEffect(() => {
     setIsLoading(true);
     // loadingScreen(isLoading);
-    getAsyncStories().then(result=>{
-      setPizzas(result.data.pizzas);
-      setIsLoading(false);
-    });
+    getAsyncPizzas()
+      .then((result) => {
+        dispatchPizzas({
+          type: 'SET_PIZZAS',
+          payload: result.data.pizzas,
+        });
+        // setPizzas(result.data.pizzas);
+        setIsLoading(false);
+    })
+    .catch(() => setIsError(true));
     // setIsLoading(false);
-  },[])
+  }, []);
   
   // if(isLoading){
   //   return <p>Loading...</p>;
@@ -59,12 +85,22 @@ const App = () => {
   // };
   // callback (book way)
   const handleRemovePizzas = (item) =>{
-    console.log(item.id);
-    const newPizzas = pizzas.filter(
-      (pizza) => item.id !== pizza.id
-    );
-    setPizzas(newPizzas);
-  }
+    dispatchPizzas({
+      type: "REMOVE_PIZZAS",
+      payload: item,
+    })
+    // const newPizzas = pizzas.filter(
+    //   (pizza) => item.id !== pizza.id
+    // );
+    // // console.log(item.id);
+    
+    // // setPizzas(newPizzas);
+    // dispatchPizzas({
+    //   type: 'SET_PIZZAS',
+    //   payload: newPizzas,
+    // });
+  };
+  
   // callback to get pizzas id
   // const handleClicked = (event) =>{
   //   console.log(pizzas);
@@ -108,6 +144,7 @@ const App = () => {
       {/* turn Search function with a handleSearch as a paramter for communication*/}
       <Search onSearch={handleSearch} search={searchTerm}/>
       {/* add list props for menu beacause now object is in App not in global window */}
+      {isError && <p>Something went wrong ...</p>}
       {isLoading ? (
         // True
         <p>Loading ...</p>
