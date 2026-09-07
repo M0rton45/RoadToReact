@@ -31,12 +31,12 @@ const App = () => {
     ];
   // const [pizzas, setPizzas] = React.useState([]);
   
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [isError, setIsError] = React.useState(false);
+
 
   const getAsyncPizzas = () =>
-    new Promise((resolve) =>
+    new Promise((resolve, reject) =>
       setTimeout(
+        // reject,
         () => resolve({data: { pizzas: initialPizzas}}),
         2000
       )
@@ -44,37 +44,55 @@ const App = () => {
   
   const pizzasReducer = (state, action) => {
     switch (action.type){
-    case 'SET_PIZZAS':
-      return action.payload;
+    case 'STORIES_FETCH_INIT':
+      return {
+        ...state,
+        isLoading: true,
+        isError: false,
+      };
+    case 'STORIES_FETCH_SUCCESS':
+      return{
+        ...state,
+        isLoading: false,
+        isError: false,
+        data: action.payload,
+      };
+    case 'STORIES_FETCH_FAILURE':
+      return{
+        ...state,
+        isLoading: false,
+        isError: true,
+      };
     case 'REMOVE_PIZZAS':
-      return state.filter(
+      return {
+        ...state,
+        data: state.data.filter(
         (pizza) => action.payload.id !== pizza.id
-      );
+        ),
+      };
     default:
       throw new Error();
-  
     }
   };
   
   const [pizzas, dispatchPizzas] = React.useReducer(
       pizzasReducer,
-      []
+      {data: [], isLoading: false, isError: false}
   );
 
   React.useEffect(() => {
-    setIsLoading(true);
+    dispatchPizzas({type: 'STORIES_FETCH_INIT'});
     // loadingScreen(isLoading);
     getAsyncPizzas()
       .then((result) => {
         dispatchPizzas({
-          type: 'SET_PIZZAS',
+          type: 'STORIES_FETCH_SUCCESS',
           payload: result.data.pizzas,
         });
-        // setPizzas(result.data.pizzas);
-        setIsLoading(false);
     })
-    .catch(() => setIsError(true));
-    // setIsLoading(false);
+    .catch(() => 
+      dispatchPizzas({type: 'STORIES_FETCH_FAILURE'})
+    );
   }, []);
   
   // if(isLoading){
@@ -132,7 +150,7 @@ const App = () => {
     // move setItem from handleSearch to useEffect to trigger side-effect only when searchTerm change
   };
   // pizzas array with filter (with function as parm and function with parm as a element of array)
-  const searchedPizzas = pizzas.filter(function (pizza){
+  const searchedPizzas = pizzas.data.filter(function (pizza){
     // then .includes chcecs value match with searchTerm like p$ or m$
     return pizza.type.toLowerCase().includes(searchTerm.toLowerCase());
   })
@@ -144,8 +162,8 @@ const App = () => {
       {/* turn Search function with a handleSearch as a paramter for communication*/}
       <Search onSearch={handleSearch} search={searchTerm}/>
       {/* add list props for menu beacause now object is in App not in global window */}
-      {isError && <p>Something went wrong ...</p>}
-      {isLoading ? (
+      {pizzas.isError && <p>Something went wrong ...</p>}
+      {pizzas.isLoading ? (
         // True
         <p>Loading ...</p>
       ) : (
