@@ -4,43 +4,18 @@ import './App.css'
 
 // TODO
 // filtr a pizzas before render by state of input field
+const API_ENDPOINT = 'https://hn.algolia.com/api/v1/search?query=';
+
 
 const App = () => {
-  const initialPizzas = [
-      {
-        type: 'margherita',
-        url: 'https://aniagotuje.pl/przepis/pizza-margherita',
-        img: './assets/margherita.jpg',
-        price: 24.90,
-        id: 0,
-      },
-      {
-        type: 'pepperoni',
-        url: 'https://aniagotuje.pl/przepis/pizza-pepperoni',
-        img: './assets/pepperoni.jpg',
-        price: 29.90,
-        id: 1,
-      },
-      {
-        type: 'mafioso',
-        url: 'https://www.dagrasso.pl/productdetailsv2/Pizza/Mafioso?localization',
-        img: './assets/mafiosa.jpg',
-        price: 31.40,
-        id: 2,
-      }
-    ];
-  // const [pizzas, setPizzas] = React.useState([]);
-  
-
-
-  const getAsyncPizzas = () =>
-    new Promise((resolve, reject) =>
-      setTimeout(
-        // reject,
-        () => resolve({data: { pizzas: initialPizzas}}),
-        2000
-      )
-    );
+  // const getAsyncPizzas = () =>
+  //   new Promise((resolve, reject) =>
+  //     setTimeout(
+  //       // reject,
+  //       () => resolve({data: { pizzas: initialPizzas}}),
+  //       2000
+  //     )
+  //   );
   
   const pizzasReducer = (state, action) => {
     switch (action.type){
@@ -49,12 +24,14 @@ const App = () => {
         ...state,
         isLoading: true,
         isError: false,
+        isEmpty: false,
       };
     case 'STORIES_FETCH_SUCCESS':
       return{
         ...state,
         isLoading: false,
         isError: false,
+        isEmpty: false,
         data: action.payload,
       };
     case 'STORIES_FETCH_FAILURE':
@@ -62,12 +39,21 @@ const App = () => {
         ...state,
         isLoading: false,
         isError: true,
+        isEmpty: false,
       };
+    case 'EMPTY_FETCH':
+      return{
+        ...state,
+        isLoading: false,
+        isError: false,
+        isEmpty: true,
+        data: [],
+      }
     case 'REMOVE_PIZZAS':
       return {
         ...state,
         data: state.data.filter(
-        (pizza) => action.payload.id !== pizza.id
+        (pizza) => action.payload.objectID !== pizza.objectID
         ),
       };
     default:
@@ -80,21 +66,52 @@ const App = () => {
       {data: [], isLoading: false, isError: false}
   );
 
+  // Move State from Search() to App() 
+  // when input field it's empty, when reload page it returns mafioso because of ||
+  const [searchTerm, setSearchTerm] = React.useState(
+    localStorage.getItem('search') || ''
+    // if empty initial value is 'mafioso'
+  );
+  // on start works, but when reused then use a last id
+
   React.useEffect(() => {
+    let ignore = false;
     dispatchPizzas({type: 'STORIES_FETCH_INIT'});
+    if (searchTerm ===''){
+      ignore = true;
+      console.log("empty string");
+      dispatchPizzas({
+        type: 'EMPTY_FETCH',
+      });
+      return;
+    }
     // loadingScreen(isLoading);
-    getAsyncPizzas()
-      .then((result) => {
-        dispatchPizzas({
-          type: 'STORIES_FETCH_SUCCESS',
-          payload: result.data.pizzas,
-        });
+    // if (searchTerm === ''){
+    //   console.log("empty string");
+    //   dispatchPizzas({
+    //     type: 'EMPTY_FETCH',
+    //   });
+    //   return;
+    // }
+    
+    fetch(`${API_ENDPOINT}+${searchTerm}`)
+      .then((response) => response.json())
+    // getAsyncPizzas()
+      .then((result) => {  
+      // console.log(result.hits)
+        if(!ignore){
+          dispatchPizzas({
+            type: 'STORIES_FETCH_SUCCESS',
+            payload: result.hits,
+          });
+        }
     })
+    
     .catch(() => 
       dispatchPizzas({type: 'STORIES_FETCH_FAILURE'})
     );
-  }, []);
-  
+    return () => {ignore = true;}
+  }, [searchTerm]);
   // if(isLoading){
   //   return <p>Loading...</p>;
   // }
@@ -129,13 +146,7 @@ const App = () => {
   // }))
   // Now we can add useEffect for localStorage if needed
   
-  // Move State from Search() to App() 
-  // when input field it's empty, when reload page it returns mafioso because of ||
-  const [searchTerm, setSearchTerm] = React.useState(
-    localStorage.getItem('search') || 'mafioso'
-    // if empty initial value is 'mafioso'
-  );
-  // on start works, but when reused then use a last id
+
 
   
   // controliing side effect (searchTerm changes) with useEffect 
@@ -150,10 +161,10 @@ const App = () => {
     // move setItem from handleSearch to useEffect to trigger side-effect only when searchTerm change
   };
   // pizzas array with filter (with function as parm and function with parm as a element of array)
-  const searchedPizzas = pizzas.data.filter(function (pizza){
-    // then .includes chcecs value match with searchTerm like p$ or m$
-    return pizza.type.toLowerCase().includes(searchTerm.toLowerCase());
-  })
+  // const searchedPizzas = pizzas.data.filter(function (pizza){
+  //   // then .includes chcecs value match with searchTerm like p$ or m$
+    // return pizza.title.toLowerCase().includes(searchTerm.toLowerCase());
+  // })
 
   // const title = 'React';
   //  <> and </> it's just a empty div
@@ -163,12 +174,14 @@ const App = () => {
       <Search onSearch={handleSearch} search={searchTerm}/>
       {/* add list props for menu beacause now object is in App not in global window */}
       {pizzas.isError && <p>Something went wrong ...</p>}
+      {pizzas.isEmpty && <p>Type theme in input</p>}
       {pizzas.isLoading ? (
         // True
         <p>Loading ...</p>
       ) : (
         // Fasle
-        <Menu list={searchedPizzas} onRemoveItem={handleRemovePizzas}/>
+        // zamiast searchedPizzas będzie gotowa lista z API 
+        <Menu list={pizzas.data} onRemoveItem={handleRemovePizzas}/>
       )}
     </>
   )
@@ -299,7 +312,7 @@ const Menu = ({list,onRemoveItem}) =>
 const Item = ({pizza,onRemoveItem}) => (
   // przy item nie trzeba key bo zwraca undefined
           <li>
-            <span>{pizza.type}</span>
+            <span>{pizza.title}</span>
             <span>
               <a href={pizza.url}>{pizza.price}</a>
             </span>
