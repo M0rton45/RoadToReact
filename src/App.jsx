@@ -65,7 +65,6 @@ const App = () => {
       pizzasReducer,
       {data: [], isLoading: false, isError: false}
   );
-
   // Move State from Search() to App() 
   // when input field it's empty, when reload page it returns mafioso because of ||
   const [searchTerm, setSearchTerm] = React.useState(
@@ -74,7 +73,7 @@ const App = () => {
   );
   // on start works, but when reused then use a last id
 
-  React.useEffect(() => {
+  const handleFetchStories = React.useCallback(() => {
     let ignore = false;
     dispatchPizzas({type: 'STORIES_FETCH_INIT'});
     if (searchTerm ===''){
@@ -112,6 +111,10 @@ const App = () => {
     );
     return () => {ignore = true;}
   }, [searchTerm]);
+
+  React.useEffect(() => {
+    handleFetchStories();
+  }, [handleFetchStories]);
   // if(isLoading){
   //   return <p>Loading...</p>;
   // }
