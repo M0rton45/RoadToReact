@@ -6,7 +6,6 @@ import './App.css'
 // filtr a pizzas before render by state of input field
 const API_ENDPOINT = 'https://hn.algolia.com/api/v1/search?query=';
 
-
 const App = () => {
   // const getAsyncPizzas = () =>
   //   new Promise((resolve, reject) =>
@@ -72,6 +71,7 @@ const App = () => {
     // if empty initial value is 'mafioso'
   );
   // on start works, but when reused then use a last id
+  const [url, setUrl] = React.useState(`${API_ENDPOINT}${searchTerm}`);
 
   const handleFetchStories = React.useCallback(() => {
     let ignore = false;
@@ -93,7 +93,7 @@ const App = () => {
     //   return;
     // }
     
-    fetch(`${API_ENDPOINT}+${searchTerm}`)
+    fetch(url)
       .then((response) => response.json())
     // getAsyncPizzas()
       .then((result) => {  
@@ -110,8 +110,17 @@ const App = () => {
       dispatchPizzas({type: 'STORIES_FETCH_FAILURE'})
     );
     return () => {ignore = true;}
-  }, [searchTerm]);
+  }, [url]);
 
+  const handleSearchInput = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const handleSearchSubmit = () => {
+    setUrl(`${API_ENDPOINT}${searchTerm}`);
+  }
+
+  // fetch data when something in handleFetchStories changes
   React.useEffect(() => {
     handleFetchStories();
   }, [handleFetchStories]);
@@ -174,10 +183,11 @@ const App = () => {
   return (
     <>
       {/* turn Search function with a handleSearch as a paramter for communication*/}
-      <Search onSearch={handleSearch} search={searchTerm}/>
+      <Search onSearch={handleSearch} search={searchTerm} handleSearch={handleSearchInput}/>
+      <button type="button" disabled={!searchTerm} onClick={handleSearchSubmit}>Search</button>
       {/* add list props for menu beacause now object is in App not in global window */}
       {pizzas.isError && <p>Something went wrong ...</p>}
-      {pizzas.isEmpty && <p>Type theme in input</p>}
+      {pizzas.isEmpty && <p>Type theme in input and search</p>}
       {pizzas.isLoading ? (
         // True
         <p>Loading ...</p>
@@ -191,7 +201,7 @@ const App = () => {
 }
 
 // controlled component with props from App() (onChange) and (value) useState for input field
-const Search = ({search, onSearch}) =>{
+const Search = ({search, onSearch, handleSearch}) =>{
 // console.log(props.onSearch),
   // using array destruct for shorter assing
   // from props.search to search
@@ -201,9 +211,10 @@ const Search = ({search, onSearch}) =>{
   <>
     <InputWithLabel
       id="search"
-      onInputChange={onSearch}
+      // onInputChange={onSearch}
       value={search}
       isFocused 
+      onInputChange={handleSearch}
     >
       <strong>Search:</strong> 
     </InputWithLabel>
