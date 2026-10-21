@@ -1,7 +1,7 @@
 // import { useState } from 'react'
 import React, { useState } from 'react';
 import './App.css'
-
+import axios from 'axios';
 // TODO
 // filtr a pizzas before render by state of input field
 const API_ENDPOINT = 'https://hn.algolia.com/api/v1/search?query=';
@@ -73,52 +73,68 @@ const App = () => {
   // on start works, but when reused then use a last id
   const [url, setUrl] = React.useState(`${API_ENDPOINT}${searchTerm}`);
 
-  const handleFetchStories = React.useCallback(() => {
-    let ignore = false;
-    dispatchPizzas({type: 'STORIES_FETCH_INIT'});
-    if (searchTerm ===''){
-      ignore = true;
-      console.log("empty string");
-      dispatchPizzas({
-        type: 'EMPTY_FETCH',
-      });
-      return;
-    }
-    // loadingScreen(isLoading);
-    // if (searchTerm === ''){
-    //   console.log("empty string");
-    //   dispatchPizzas({
-    //     type: 'EMPTY_FETCH',
-    //   });
-    //   return;
-    // }
-    
-    fetch(url)
-      .then((response) => response.json())
-    // getAsyncPizzas()
-      .then((result) => {  
-      // console.log(result.hits)
-        if(!ignore){
-          dispatchPizzas({
-            type: 'STORIES_FETCH_SUCCESS',
-            payload: result.hits,
-          });
-        }
-    })
-    
-    .catch(() => 
-      dispatchPizzas({type: 'STORIES_FETCH_FAILURE'})
-    );
-    return () => {ignore = true;}
-  }, [url]);
-
-  const handleSearchInput = (event) => {
+    const handleSearchInput = (event) => {
     setSearchTerm(event.target.value);
   };
 
   const handleSearchSubmit = () => {
     setUrl(`${API_ENDPOINT}${searchTerm}`);
   }
+  const handleFetchStories = React.useCallback(async () =>{
+    dispatchPizzas({type: 'STORIES_FETCH_INIT'});
+
+    try{
+      const result = await axios.get(url);
+
+      dispatchPizzas({
+        type: 'STORIES_FETCH_SUCCESS',
+        payload: result.data.hits,
+      });
+    }
+    catch{
+      dispatchPizzas({type: 'STORIES_FETCH_FAILURE'});
+    }
+  }, [url]);
+  // const handleFetchStories = React.useEffect(() => {
+  //   let ignore = false;
+  //   dispatchPizzas({type: 'STORIES_FETCH_INIT'});
+  //   if (searchTerm ===''){
+  //     ignore = true;
+  //     console.log("empty string");
+  //     dispatchPizzas({
+  //       type: 'EMPTY_FETCH',
+  //     });
+  //     return;
+  //   }
+  //   // loadingScreen(isLoading);
+  //   // if (searchTerm === ''){
+  //   //   console.log("empty string");
+  //   //   dispatchPizzas({
+  //   //     type: 'EMPTY_FETCH',
+  //   //   });
+  //   //   return;
+  //   // }
+    
+  //   fetch(`${API_ENDPOINT}+${searchTerm}`)
+  //     .then((response) => response.json())
+  //   // getAsyncPizzas()
+  //     .then((result) => {  
+  //     // console.log(result.hits)
+  //       if(!ignore){
+  //         dispatchPizzas({
+  //           type: 'STORIES_FETCH_SUCCESS',
+  //           payload: result.hits,
+  //         });
+  //       }
+  //   })
+    
+  //   .catch(() => 
+  //     dispatchPizzas({type: 'STORIES_FETCH_FAILURE'})
+  //   );
+  //   return () => {ignore = true;}
+  // }, [searchTerm]);
+
+
 
   // fetch data when something in handleFetchStories changes
   React.useEffect(() => {
