@@ -77,12 +77,13 @@ const App = () => {
     setSearchTerm(event.target.value);
   };
 
-  const handleSearchSubmit = () => {
+  const handleSearchSubmit = (event) => {
     setUrl(`${API_ENDPOINT}${searchTerm}`);
+    event.preventDefault();
   }
   const handleFetchStories = React.useCallback(async () =>{
     dispatchPizzas({type: 'STORIES_FETCH_INIT'});
-
+    if (searchTerm ==='') dispatchPizzas({type: 'EMPTY_FETCH'});
     try{
       const result = await axios.get(url);
 
@@ -182,6 +183,8 @@ const App = () => {
     localStorage.setItem('search', searchTerm);
   }, [searchTerm]);
 
+  
+
   // Event handler in App()
   const handleSearch = (event) =>{
     // show variable from Search() input in App()
@@ -199,8 +202,8 @@ const App = () => {
   return (
     <>
       {/* turn Search function with a handleSearch as a paramter for communication*/}
-      <Search onSearch={handleSearch} search={searchTerm} handleSearch={handleSearchInput}/>
-      <button type="button" disabled={!searchTerm} onClick={handleSearchSubmit}>Search</button>
+      <Search onSearch={handleSearch} search={searchTerm} handleSearch={handleSearchInput} handleSearchSubmit={handleSearchSubmit}/>
+      {/* <button type="button" disabled={!searchTerm} onClick={handleSearchSubmit}>Search</button> */}
       {/* add list props for menu beacause now object is in App not in global window */}
       {pizzas.isError && <p>Something went wrong ...</p>}
       {pizzas.isEmpty && <p>Type theme in input and search</p>}
@@ -217,7 +220,7 @@ const App = () => {
 }
 
 // controlled component with props from App() (onChange) and (value) useState for input field
-const Search = ({search, onSearch, handleSearch}) =>{
+const Search = ({search, onSearch, handleSearch, handleSearchSubmit}) =>{
 // console.log(props.onSearch),
   // using array destruct for shorter assing
   // from props.search to search
@@ -225,16 +228,20 @@ const Search = ({search, onSearch, handleSearch}) =>{
   // const { search, onSearch} = props;
   return(
   <>
-    <InputWithLabel
-      id="search"
-      // onInputChange={onSearch}
-      value={search}
-      isFocused 
-      onInputChange={handleSearch}
-    >
-      <strong>Search:</strong> 
-    </InputWithLabel>
-  
+    <form onSubmit={handleSearchSubmit}>
+      <InputWithLabel
+        id="search"
+        // onInputChange={onSearch}
+        value={search}
+        isFocused 
+        onInputChange={handleSearch}
+      >
+        <strong>Search:</strong> 
+      </InputWithLabel>
+      <button type="submit" disabled={!search}>
+        Submit
+      </button>
+    </form>  
   {/* Controlled element */}
     {/* <label htmlFor="search">Search: </label>
     {/* using props onSearch (handleSearch) */}
