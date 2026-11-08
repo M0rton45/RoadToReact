@@ -15,7 +15,7 @@ const App = () => {
   //       2000
   //     )
   //   );
-
+  
   const pizzasReducer = (state, action) => {
     switch (action.type){
     case 'STORIES_FETCH_INIT':
@@ -59,27 +59,87 @@ const App = () => {
       throw new Error();
     }
   };
-
+  
   const [pizzas, dispatchPizzas] = React.useReducer(
       pizzasReducer,
       {data: [], isLoading: false, isError: false}
   );
+  // Move State from Search() to App() 
+  // when input field it's empty, when reload page it returns mafioso because of ||
+  const [searchTerm, setSearchTerm] = React.useState(
+    localStorage.getItem('search') || ''
+    // if empty initial value is 'mafioso'
+  );
+  // on start works, but when reused then use a last id
+  const [url, setUrl] = React.useState(`${API_ENDPOINT}${searchTerm}`);
 
-  React.useEffect(() => {
+    const handleSearchInput = (event) => {
+    setSearchTerm(event.target.value);
+  };
+
+  const handleSearchSubmit = () => {
+    setUrl(`${API_ENDPOINT}${searchTerm}`);
+  }
+  const handleFetchStories = React.useCallback(async () =>{
     dispatchPizzas({type: 'STORIES_FETCH_INIT'});
-    // loadingScreen(isLoading);
-    getAsyncPizzas()
-      .then((result) => {
-        dispatchPizzas({
-          type: 'STORIES_FETCH_SUCCESS',
-          payload: result.data.pizzas,
-        });
-    })
-    .catch(() => 
-      dispatchPizzas({type: 'STORIES_FETCH_FAILURE'})
-    );
-  }, []);
-  
+
+    try{
+      const result = await axios.get(url);
+
+      dispatchPizzas({
+        type: 'STORIES_FETCH_SUCCESS',
+        payload: result.data.hits,
+      });
+    }
+    catch{
+      dispatchPizzas({type: 'STORIES_FETCH_FAILURE'});
+    }
+  }, [url]);
+  // const handleFetchStories = React.useEffect(() => {
+  //   let ignore = false;
+  //   dispatchPizzas({type: 'STORIES_FETCH_INIT'});
+  //   if (searchTerm ===''){
+  //     ignore = true;
+  //     console.log("empty string");
+  //     dispatchPizzas({
+  //       type: 'EMPTY_FETCH',
+  //     });
+  //     return;
+  //   }
+  //   // loadingScreen(isLoading);
+  //   // if (searchTerm === ''){
+  //   //   console.log("empty string");
+  //   //   dispatchPizzas({
+  //   //     type: 'EMPTY_FETCH',
+  //   //   });
+  //   //   return;
+  //   // }
+    
+  //   fetch(`${API_ENDPOINT}+${searchTerm}`)
+  //     .then((response) => response.json())
+  //   // getAsyncPizzas()
+  //     .then((result) => {  
+  //     // console.log(result.hits)
+  //       if(!ignore){
+  //         dispatchPizzas({
+  //           type: 'STORIES_FETCH_SUCCESS',
+  //           payload: result.hits,
+  //         });
+  //       }
+  //   })
+    
+  //   .catch(() => 
+  //     dispatchPizzas({type: 'STORIES_FETCH_FAILURE'})
+  //   );
+  //   return () => {ignore = true;}
+  // }, [searchTerm]);
+
+
+
+  // fetch data when something in handleFetchStories changes
+  React.useEffect(() => {
+    handleFetchStories();
+  }, [handleFetchStories]);
   // if(isLoading){
   //   return <p>Loading...</p>;
   // }
@@ -96,14 +156,14 @@ const App = () => {
     //   (pizza) => item.id !== pizza.id
     // );
     // // console.log(item.id);
-
+    
     // // setPizzas(newPizzas);
     // dispatchPizzas({
     //   type: 'SET_PIZZAS',
     //   payload: newPizzas,
     // });
   };
-
+  
   // callback to get pizzas id
   // const handleClicked = (event) =>{
   //   console.log(pizzas);
@@ -113,22 +173,23 @@ const App = () => {
   //   return pizza.id !== Number(event.target.id);
   // }))
   // Now we can add useEffect for localStorage if needed
+  
 
 
-
-
+  
   // controliing side effect (searchTerm changes) with useEffect 
   React.useEffect(() =>{
     localStorage.setItem('search', searchTerm);
   }, [searchTerm]);
+
   
 
   // Event handler in App()
-  // const handleSearch = (event) =>{
+  const handleSearch = (event) =>{
     // show variable from Search() input in App()
-    // setSearchTerm(event.target.value);
+    setSearchTerm(event.target.value);
     // move setItem from handleSearch to useEffect to trigger side-effect only when searchTerm change
-  // };
+  };
   // pizzas array with filter (with function as parm and function with parm as a element of array)
   // const searchedPizzas = pizzas.data.filter(function (pizza){
   //   // then .includes chcecs value match with searchTerm like p$ or m$
@@ -140,7 +201,8 @@ const App = () => {
   return (
     <>
       {/* turn Search function with a handleSearch as a paramter for communication*/}
-      <Search onSearch={handleSearch} search={searchTerm}/>
+      <Search onSearch={handleSearch} search={searchTerm} handleSearch={handleSearchInput}/>
+      <button type="button" disabled={!searchTerm} onClick={handleSearchSubmit}>Search</button>
       {/* add list props for menu beacause now object is in App not in global window */}
       {pizzas.isError && <p>Something went wrong ...</p>}
       {pizzas.isEmpty && <p>Type theme in input and search</p>}
@@ -157,7 +219,7 @@ const App = () => {
 }
 
 // controlled component with props from App() (onChange) and (value) useState for input field
-const Search = ({search, onSearch}) =>{
+const Search = ({search, onSearch, handleSearch}) =>{
 // console.log(props.onSearch),
   // using array destruct for shorter assing
   // from props.search to search
@@ -167,9 +229,10 @@ const Search = ({search, onSearch}) =>{
   <>
     <InputWithLabel
       id="search"
-      onInputChange={onSearch}
+      // onInputChange={onSearch}
       value={search}
       isFocused 
+      onInputChange={handleSearch}
     >
       <strong>Search:</strong> 
     </InputWithLabel>
