@@ -77,8 +77,9 @@ const App = () => {
     setSearchTerm(event.target.value);
   };
 
-  const handleSearchSubmit = () => {
+  const handleSearchSubmit = (event) => {
     setUrl(`${API_ENDPOINT}${searchTerm}`);
+    event.preventDefault();
   }
   const handleFetchStories = React.useCallback(async () =>{
     dispatchPizzas({type: 'STORIES_FETCH_INIT'});
@@ -185,11 +186,11 @@ const App = () => {
   
 
   // Event handler in App()
-  const handleSearch = (event) =>{
-    // show variable from Search() input in App()
-    setSearchTerm(event.target.value);
-    // move setItem from handleSearch to useEffect to trigger side-effect only when searchTerm change
-  };
+  // const handleSearch = (event) =>{
+  //   // show variable from Search() input in App()
+  //   setSearchTerm(event.target.value);
+  //   // move setItem from handleSearch to useEffect to trigger side-effect only when searchTerm change
+  // };
   // pizzas array with filter (with function as parm and function with parm as a element of array)
   // const searchedPizzas = pizzas.data.filter(function (pizza){
   //   // then .includes chcecs value match with searchTerm like p$ or m$
@@ -201,8 +202,11 @@ const App = () => {
   return (
     <>
       {/* turn Search function with a handleSearch as a paramter for communication*/}
-      <Search onSearch={handleSearch} search={searchTerm} handleSearch={handleSearchInput}/>
-      <button type="button" disabled={!searchTerm} onClick={handleSearchSubmit}>Search</button>
+      <SearchForm 
+        search={searchTerm} 
+        onSearchInput={handleSearchInput} 
+        onSearchSubmit={handleSearchSubmit}
+      />
       {/* add list props for menu beacause now object is in App not in global window */}
       {pizzas.isError && <p>Something went wrong ...</p>}
       {pizzas.isEmpty && <p>Type theme in input and search</p>}
@@ -219,38 +223,27 @@ const App = () => {
 }
 
 // controlled component with props from App() (onChange) and (value) useState for input field
-const Search = ({search, onSearch, handleSearch}) =>{
+const SearchForm = ({search, onSearchInput, onSearchSubmit}) =>(
 // console.log(props.onSearch),
   // using array destruct for shorter assing
   // from props.search to search
   // destructuring in block body
   // const { search, onSearch} = props;
-  return(
-  <>
+  <form onSubmit={onSearchSubmit}>
     <InputWithLabel
       id="search"
       // onInputChange={onSearch}
       value={search}
       isFocused 
-      onInputChange={handleSearch}
+      onInputChange={onSearchInput}
     >
       <strong>Search:</strong> 
     </InputWithLabel>
-  
-  {/* Controlled element */}
-    {/* <label htmlFor="search">Search: </label>
-    {/* using props onSearch (handleSearch) */}
-    {/* Use props to add for input initValue as a searchTerm*/}
-    {/* <input 
-      id="search" 
-      type="text" 
-      onChange={onSearch} 
-      value={search}
-    /> */}
-    {/* when onChange users turn handleSearch function and App() update state */}
-  </>
-  )
-}
+    <button type="submit">
+      Submit
+    </button>
+  </form>
+  );
 // BUTTON REMOVER
 const BtnRemover = ({
   id,
